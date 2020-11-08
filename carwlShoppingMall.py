@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import json
 
 
-class carwlShoppingMall:
+class CarwlShoppingMall:
     def __init__(self):
         self.shoppingMallList = []
 
@@ -47,6 +47,40 @@ class carwlShoppingMall:
 
     def getGoodsRegisteredBySearchFromSSG(self):
         print('구현중')
+    
+    def foreignLangSearch(self, keywords):
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+            'Referer': 'https://kornorms.korean.go.kr/example/exampleList.do?regltn_code=0003',
+        }
+        trans = set([])
+
+        for keyword in keywords:
+            
+            url = "https://kornorms.korean.go.kr/example/exampleList.do?regltn_code=0003"
+            data = {'example_no':'',
+            'example_search_list[0].searchCondition':'srclang_mark',
+            'example_search_list[0].searchEquals':'equal',
+            'example_search_list[0].searchKeyword':keyword,
+            'allCheck1':'all',
+            's_foreign_gubun':'0003',
+            '_s_foreign_gubun':'on',
+            's_guk_nm':'',
+            's_lang_nm':'',
+            'pageUnit':'10',
+            'pageIndex':'1' }
+
+            response_html = this.webRequest(method='POST', url=url, header_dict=headers, params_dict=data)
+            soup_obj = BeautifulSoup(response_html, "html.parser")
+            table = soup_obj.findAll("table", {"class": "tableList01"})
+            a = table[0].findAll("a", {"class": "korean"})
+            if len(a) > 0:
+                trans.add(a[0].text)
+                trans.add(keyword)
+            else:
+                trans.add(keyword)
+        
+        return trans
 
     def webRequest(self, method, url, header_dict, params_dict, is_urlencoded=True):
         """Web Get/Post에 따라 Web request 후 결과를 dictionary로 반환"""
