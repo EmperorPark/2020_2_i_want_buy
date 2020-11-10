@@ -1,6 +1,6 @@
 if __name__ == '__main__':
     print ('직접실행불가')
-    exit()
+    exit(0)
 
 import requests
 from bs4 import BeautifulSoup
@@ -70,7 +70,7 @@ class CarwlShoppingMall:
             'pageUnit':'10',
             'pageIndex':'1' }
 
-            response_html = this.webRequest(method='POST', url=url, header_dict=headers, params_dict=data)
+            response_html = self.webRequest(method='POST', url=url, header_dict=headers, params_dict=data)
             soup_obj = BeautifulSoup(response_html, "html.parser")
             table = soup_obj.findAll("table", {"class": "tableList01"})
             a = table[0].findAll("a", {"class": "korean"})
@@ -84,25 +84,27 @@ class CarwlShoppingMall:
 
     def webRequest(self, method, url, header_dict, params_dict, is_urlencoded=True):
         """Web Get/Post에 따라 Web request 후 결과를 dictionary로 반환"""
+        
+        res = requests.session()
         method = method.upper() # 편의 및 통일성을 위해 대문자로 통일
         if method not in ('GET', 'POST'):
             raise Exception('WebRequst Method 비정상: {}'.format(method))
         
         if method == 'GET':
-            responce = requests.get(url=url, headers=header_dict, params=params_dict)
+            response = res.get(url=url, headers=header_dict, params=params_dict)
         elif method == 'POST':
             if is_urlencoded is True:
                 if 'Content-Type' not in header_dict.keys():
                     header_dict['Content-Type'] = 'application/x-www-form-urlencoded'
-                response = requests.post(url=url, headers=header_dict, data=params_dict)
+                response = res.post(url=url, headers=header_dict, data=params_dict)
             else:
                 if 'Content-Type' not in header_dict.keys():
                     header_dict['Content-Type'] = 'application/json'
-                response = requests.post(url=url, data=json.dumps(params_dict), headers=header_dict)
+                response = res.post(url=url, data=json.dumps(params_dict), headers=header_dict)
 
         rtn_meta = {'status_code':response.status_code, 'ok':response.ok, 'encoding':response.encoding, 'Content-Type': response.headers['Content-Type']}
 
-        if 'json' in str(responce.headers['Content-Type']):
+        if 'json' in str(response.headers['Content-Type']):
             return {**rtn_meta, **response.json()}
         elif 'text/html' in str(response.headers['Content-Type']):
             return response.content
