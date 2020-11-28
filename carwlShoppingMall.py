@@ -46,7 +46,7 @@ class CarwlShoppingMall:
         
     def getGoodsRegisteredBySearchFromCoupang(self, searchWord):
         print('===================쿠팡 검색 시작===================')
-        print('검색 유사도: 검색어 2개 이상 포함')
+        print('검색 유사도: (검색어 갯수/2) + 1 이상 포함')
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
             'Referer': 'https://www.coupang.com',
@@ -87,8 +87,12 @@ class CarwlShoppingMall:
                     if str in product.text.strip():
                         count += 1
             
-            if count >= 2:
-                print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
+            if len(keywords) > 2:
+                if count >= len(keywords) + 1:
+                    print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
+            else:
+                if count >= 2:
+                    print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
 
         
         print('===================쿠팡 검색 끝===================')
@@ -96,7 +100,58 @@ class CarwlShoppingMall:
 
 
     def getGoodsRegisteredBySearchFromSSG(self, searchWord):
-        print('구현중')
+        print('===================신세계 검색 시작===================')
+        print('검색 유사도: (검색어 갯수/2) + 1 이상 포함')
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+            'Referer': 'http://www.ssg.com/',
+        }
+
+        url = "http://www.ssg.com/search.ssg"
+        data = {'target': 'all',
+        'query': searchWord
+        }
+        
+        keywords = searchWord.split()
+        search_dict = self.foreignLangSearch(keywords)
+
+        search_list = self.getCombinationSearchResult(search_dict)
+
+        response_html = self.webRequest(method='GET', url=url, header_dict=headers, params_dict=data)
+        # with open('StudyScripting/Coupang/result.html', 'w') as file_handle:
+        #         file_handle.write(str(response_html))
+
+        # print(response_html)
+        soup_obj = BeautifulSoup(response_html, "html.parser")
+        
+        lis = soup_obj.find("ul", {"id": "idProductImg"}).findAll("li")
+        for li in lis:
+            li_title = li.find("div", {"class": "title"})
+            a_title = li_title.find("a")
+            product = a_title.find("em", {"class": "tx_ko"})
+
+            li_price = li.find("div", {"class": "opt_price"})
+            
+            priceStr = ''
+            if li_price != None:
+                em_price = li_price.find("em", {"class": "ssg_price"})
+                priceStr = em_price.text.strip()
+            
+            count = 0
+            for each_list in search_list:
+                for str in each_list:
+                    if str.upper() in product.text.strip().upper():
+                        count += 1
+            
+            if len(keywords) > 2:
+                if count >= len(keywords) + 1:
+                    print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
+            else:
+                if count >= 2:
+                    print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
+
+        
+        print('===================신세계 검색 끝===================')
     
     def foreignLangSearch(self, keywords):
         headers = {
@@ -148,20 +203,20 @@ class CarwlShoppingMall:
             raise Exception('WebRequst Method 비정상: {}'.format(method))
         
         if method == 'GET':
-            # response = res.get(url=url, headers=header_dict, params=params_dict)
-            response = res.get(url=url, headers=header_dict, params=params_dict, proxies={"http": "http://127.0.0.1:8888", "https":"http:127.0.0.1:8888"}, verify=r"FiddlerRoot.pem")
+            response = res.get(url=url, headers=header_dict, params=params_dict)
+            # response = res.get(url=url, headers=header_dict, params=params_dict, proxies={"http": "http://127.0.0.1:8888", "https":"http:127.0.0.1:8888"}, verify=r"FiddlerRoot.pem")
         elif method == 'POST':
             if is_urlencoded is True:
                 if 'Content-Type' not in header_dict.keys():
                     header_dict['Content-Type'] = 'application/x-www-form-urlencoded'
-                # response = res.post(url=url, headers=header_dict, data=params_dict)
-                response = res.post(url=url, headers=header_dict, data=params_dict, proxies={"http": "http://127.0.0.1:8888", "https":"http:127.0.0.1:8888"}, verify=r"FiddlerRoot.pem")
+                response = res.post(url=url, headers=header_dict, data=params_dict)
+                # response = res.post(url=url, headers=header_dict, data=params_dict, proxies={"http": "http://127.0.0.1:8888", "https":"http:127.0.0.1:8888"}, verify=r"FiddlerRoot.pem")
             else:
                 
                 if 'Content-Type' not in header_dict.keys():
                     header_dict['Content-Type'] = 'application/json'
-                # response = res.post(url=url, data=json.dumps(params_dict), headers=header_dict)
-                response = res.post(url=url, data=json.dumps(params_dict), headers=header_dict, proxies={"http": "http://127.0.0.1:8888", "https":"http:127.0.0.1:8888"}, verify=r"FiddlerRoot.pem")
+                response = res.post(url=url, data=json.dumps(params_dict), headers=header_dict)
+                # response = res.post(url=url, data=json.dumps(params_dict), headers=header_dict, proxies={"http": "http://127.0.0.1:8888", "https":"http:127.0.0.1:8888"}, verify=r"FiddlerRoot.pem")
 
         
         rtn_meta = {'status_code':response.status_code, 'ok':response.ok, 'encoding':response.encoding, 'Content-Type': response.headers['Content-Type']}

@@ -21,7 +21,7 @@ def main():
         sel = int(input('실행하고자 하는 번호를 입력해주세요 >> '))
         if sel == 1: # 등록 확인
             print('등록확인 모드(쿠팡(www.coupang.com), 신세계(www.ssg.com))')
-            print('ex) 아이폰 12 미니 자급제 64GB')
+            print('ex) 아이폰 12 미니 자급제')
             searchWord = str(input('상품 검색(띄어쓰기 구분이 명확할수록 검색 정확도가 높음) >> '))
             objCarwlShoppingMall.getGoodsRegisteredBySearch(searchWord)
 
