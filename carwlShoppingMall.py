@@ -11,33 +11,72 @@ import time
 import utils
 
 class CarwlShoppingMall:
-    def __init__(self):
-        self.shoppingMallList = []
-
-    def appendShoppingMallList(self):
-        """ShoppingMall 목록을 로드한다."""
-        self.shoppingMallList = [] # 목록 초기화
-        with open('Services/URL_List.txt', 'r') as file_handle:
-            line_txt = file_handle.readline()
-            self.shoppingMallList.append(line_txt)
-        if len(self.shoppingMallList) == 0:
-            print ('!!!예외: shoppingMallList 없음. 프로그램 종료')
     
-    def getGoodsPurchaseAvailableByURL(self, site):
-        if site == 'Coupang':
-            self.getGoodsPurchaseAvailableByURLFromCoupang()
-        elif site == 'SSG':
-            self.getGoodsPurchaseAvailableByURLFromSSG()
+    def getGoodsPurchaseAvailableByURL(self, site_url):
+        ''' 상품 구매 가능여부 사이트별 라우팅 함수'''
+        if 'coupang.com'.lower() in site_url.lower():
+            self.getGoodsPurchaseAvailableByURLFromCoupang(site_url)
+        elif 'ssg.com'.lower() in site_url.lower():
+            self.getGoodsPurchaseAvailableByURLFromSSG(site_url)
         else:
-            print('!!!예외: site 불명확({}), getDataBySearch 미실행'.format(site))
+            print('!!!예외: site 불명확({}),  상품 구매 가능여부 확인 미실행'.format(site_url))
 
-    def getGoodsPurchaseAvailableByURLFromCoupang(self):
-        print('구현중')
+    def getGoodsPurchaseAvailableByURLFromCoupang(self, site_url):
+        '''쿠팡 URL의 상품 구매 가능 확인 함수'''
+        print('===================쿠팡 URL 확인 시작===================')
 
-    def getGoodsPurchaseAvailableByURLFromSSG(self):
-        print('구현중')
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+            'Referer': 'https://www.coupang.com/',
+        }
+
+        url = site_url
+        
+        response_html = self.webRequest(method='GET', url=url, header_dict=headers)
+        
+        soup_obj = BeautifulSoup(response_html, "html.parser")
+        
+        div_sold_out = soup_obj.find("div", {"class": "prod-atf"}).find("div", {"class": "sold-out"})
+
+        buyBtn = soup_obj.find("button", {"class": "prod-buy-btn"})
+
+        if buyBtn != None and div_sold_out == None:
+            print('구매가능')
+        else:
+            print('구매불가')
+        
+        print('===================쿠팡 URL 확인 끝===================')
+
+    def getGoodsPurchaseAvailableByURLFromSSG(self, site_url):
+        '''신세계 URL의 상품 구매 가능 확인 함수'''
+        print('===================신세계 URL 확인 시작===================')
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+            'Referer': 'http://www.ssg.com/',
+        }
+
+        url = site_url
+        
+        response_html = self.webRequest(method='GET', url=url, header_dict=headers)
+        
+        soup_obj = BeautifulSoup(response_html, "html.parser")
+        
+        oriCart = soup_obj.find("div", {"id": "oriCart"})
+
+        if oriCart != None:
+            actionPayment = oriCart.find("a", {"id":"actionPayment"})
+            if actionPayment != None:
+                print('구매가능')
+            else:
+                print('구매불가')
+        else:
+            print('구매불가')
+
+        print('===================신세계 URL 확인 끝===================')
 
     def getGoodsRegisteredBySearch(self, searchWord):
+        ''' 상품등록 검색 함수 각 사이트별 검색함수 실행 '''
         if len(searchWord.split()) < 2:
             print('검색어를 2단어 이상 입력해 주세요')
             return
@@ -45,6 +84,7 @@ class CarwlShoppingMall:
         self.getGoodsRegisteredBySearchFromSSG(searchWord)
         
     def getGoodsRegisteredBySearchFromCoupang(self, searchWord):
+        ''' 쿠팡 등록 검색함수 '''
         print('===================쿠팡 검색 시작===================')
         print('검색 유사도: (검색어 갯수/2) + 1 이상 포함')
         headers = {
@@ -97,9 +137,8 @@ class CarwlShoppingMall:
         
         print('===================쿠팡 검색 끝===================')
 
-
-
     def getGoodsRegisteredBySearchFromSSG(self, searchWord):
+        '''신세계 등록 검색함수'''
         print('===================신세계 검색 시작===================')
         print('검색 유사도: (검색어 갯수/2) + 1 이상 포함')
         headers = {
@@ -154,6 +193,7 @@ class CarwlShoppingMall:
         print('===================신세계 검색 끝===================')
     
     def foreignLangSearch(self, keywords):
+        '''영어나 왜래어를 왜래어 사전을 통해 영어 또는 한국어로 받아 딕셔너리로 반환'''
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
             'Referer': 'https://kornorms.korean.go.kr/example/exampleList.do?regltn_code=0003',
@@ -195,8 +235,10 @@ class CarwlShoppingMall:
         
         return trans
 
-    def webRequest(self, method, url, header_dict, params_dict, is_urlencoded=True):
-        """Web Get/Post에 따라 Web request 후 결과를 dictionary로 반환"""
+    def webRequest(self, method, url, header_dict, params_dict={}, is_urlencoded=True):
+        """Web Get/Post에 따라 Web request 후 결과를 dictionary로 반환
+        이 클래스의 검색 타겟에 맞춰 최적화 함, 범용성 낮음
+        """
         res = requests.session() # 세션 유지
         method = method.upper() # 편의 및 통일성을 위해 대문자로 통일
         if method not in ('GET', 'POST'):
@@ -230,7 +272,6 @@ class CarwlShoppingMall:
                 return {**rtn_meta, **{'text':response.text}}
         else:
             return rtn_meta
-    
 
     def getCombinationSearchResult(self, dict):
         '''검색어 조합 알고리즘을 수행하여 이차원 리스트로 반환하는 함수'''
