@@ -86,7 +86,7 @@ class CarwlShoppingMall:
     def getGoodsRegisteredBySearchFromCoupang(self, searchWord):
         ''' 쿠팡 등록 검색함수 '''
         print('===================쿠팡 검색 시작===================')
-        print('검색 유사도: (검색어 갯수/2) + 1 이상 포함')
+        print('검색 유사도: (검색어 갯수//2) 이상 포함')
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
             'Referer': 'https://www.coupang.com',
@@ -121,14 +121,22 @@ class CarwlShoppingMall:
                 )
                 priceStr = price.text.strip()
             
+            count_tmp = 0
             count = 0
             for each_list in search_list:
                 for str in each_list:
-                    if str in product.text.strip():
-                        count += 1
+                    if str.lower() in product.text.strip().lower():
+                        count_tmp += 1
+                        # print(str)
+                if count_tmp > count:
+                    count = count_tmp
+                
+                # print(count)
+                # print('clear')
+                count_tmp = 0    
             
             if len(keywords) > 2:
-                if count >= len(keywords) + 1:
+                if count >= len(keywords)//2:
                     print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
             else:
                 if count >= 2:
@@ -140,7 +148,7 @@ class CarwlShoppingMall:
     def getGoodsRegisteredBySearchFromSSG(self, searchWord):
         '''신세계 등록 검색함수'''
         print('===================신세계 검색 시작===================')
-        print('검색 유사도: (검색어 갯수/2) + 1 이상 포함')
+        print('검색 유사도: (검색어 갯수//2) 이상 포함')
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
             'Referer': 'http://www.ssg.com/',
@@ -176,14 +184,22 @@ class CarwlShoppingMall:
                 em_price = li_price.find("em", {"class": "ssg_price"})
                 priceStr = em_price.text.strip()
             
+            count_tmp = 0
             count = 0
             for each_list in search_list:
                 for str in each_list:
-                    if str.upper() in product.text.strip().upper():
-                        count += 1
+                    if str.lower() in product.text.strip().lower():
+                        count_tmp += 1
+                        # print(str)
+                if count_tmp > count:
+                    count = count_tmp
+                
+                # print(count)
+                # print('clear')
+                count_tmp = 0    
             
             if len(keywords) > 2:
-                if count >= len(keywords) + 1:
+                if count >= len(keywords)//2:
                     print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
             else:
                 if count >= 2:

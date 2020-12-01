@@ -1,23 +1,24 @@
 import sys
+from multiprocessing import Process, Queue
 
 import carwlShoppingMall
-
-def exitErrorInput():
-    print('오입력 발생')
-    print('종료')
-    sys.exit(0)
+import teleGramBotManager
 
 def main():
+    
     print('=======================================================')
     print('         =======================================       ')
     print('              ========================                 ')
-    print('telegram에서 EmperorPurchaseAvailableBot을 추가하세요!')
+    print('telegram에서 @EmperorPurchaseAvailableBot을 추가하세요!')
     print('              ========================                 ')
     print('         =======================================       ')
     print('=======================================================')
-    
-    
-    
+
+    #objTeleGramBotManager = teleGramBotManager.TeleGramBotManager()
+    result = Queue()
+    th1 = Process(target=teleGramBotManager.TeleGramBotManager, args=(1, result))
+    th1.start()
+
     objCarwlShoppingMall = carwlShoppingMall.CarwlShoppingMall()
     
     # 수행 루틴 오토마타
@@ -56,6 +57,14 @@ def main():
         else:
             print ('오입력이 발생 하였습니다. 다시 수행해주세요')
             sys.exit(0)
+
+    th1.join()
+
+def exitErrorInput():
+    print('오입력 발생')
+    print('종료')
+    sys.exit(0)
+
 
 if __name__ == '__main__':
     main()
