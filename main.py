@@ -14,10 +14,13 @@ def main():
     print('         =======================================       ')
     print('=======================================================')
 
-    #objTeleGramBotManager = teleGramBotManager.TeleGramBotManager()
-    result = Queue()
-    th1 = Process(target=teleGramBotManager.TeleGramBotManager, args=(1, result))
-    th1.start()
+    q = Queue()
+
+    objTeleGramBotManager = teleGramBotManager.TeleGramBotManager(1, q)
+    
+    # q = Queue()
+    # th1 = Process(target=teleGramBotManager.TeleGramBotManager, args=(1, q))
+    # th1.start()
 
     objCarwlShoppingMall = carwlShoppingMall.CarwlShoppingMall()
     
@@ -50,7 +53,8 @@ def main():
             objCarwlShoppingMall.getGoodsRegisteredBySearch(searchWord)
 
         elif sel == 2:
-            print('판매확인 모드(쿠팡(www.coupang.com), 신세계(www.ssg.com))')
+            print('판매확인 모드(쿠팡(www.coupang.com), 신세계(www.ssg.com)), 현재는 PC버전 홈페이지만 지원합니다.')
+            print('모바일에서 링크 확인시 쇼핑몰 웹페이지 하단의 pc버전 보기 기능을 이용해 주세요')
             checkurl = str(input('상품 url입력 >> '))
             objCarwlShoppingMall.getGoodsPurchaseAvailableByURL(checkurl)
             
@@ -58,7 +62,7 @@ def main():
             print ('오입력이 발생 하였습니다. 다시 수행해주세요')
             sys.exit(0)
 
-    th1.join()
+    # th1.terminate()
 
 def exitErrorInput():
     print('오입력 발생')

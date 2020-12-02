@@ -10,33 +10,40 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, Filters
 from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler
 
+import pprint
 
 class TeleGramBotManager:
 
-    def __init__(self, id, result):
+    def __init__(self, id, q):
         with open('../tele_key.txt', 'r') as file_handle:
             self.line_txt = file_handle.readline()
 
-        BOT_TOKEN=self.line_txt.strip()
+        self.BOT_TOKEN=self.line_txt.strip()
 
-        updater = Updater( token=BOT_TOKEN, use_context=True )
-        dispatcher = updater.dispatcher
+        self.updater = Updater( token=self.BOT_TOKEN, use_context=True )
+        self.dispatcher = self.updater.dispatcher
 
-        task_buttons_handler = CommandHandler( 'tasks', self.cmd_task_buttons )
-        start_buttons_handler = CommandHandler( 'start', self.cmd_start_buttons )
-        button_callback_handler = CallbackQueryHandler( self.cb_button )    
+        self.task_buttons_handler = CommandHandler( 'tasks', self.cmd_task_buttons )
+        self.start_buttons_handler = CommandHandler( 'start', self.cmd_start_buttons )
+        self.reg_buttons_handler = CommandHandler( 'reg', self.cmd_reg_buttons )
+        self.available_buttons_handler = CommandHandler( 'available', self.cmd_available_buttons )
+        self.say_buttons_handler = CommandHandler( 'say', self.say, pass_args=True)
+        self.button_callback_handler = CallbackQueryHandler( self.cb_button )    
 
-        dispatcher.add_handler(task_buttons_handler)
-        dispatcher.add_handler(start_buttons_handler)
-        dispatcher.add_handler(button_callback_handler)
+        self.dispatcher.add_handler(self.task_buttons_handler)
+        self.dispatcher.add_handler(self.start_buttons_handler)
+        self.dispatcher.add_handler(self.reg_buttons_handler)
+        self.dispatcher.add_handler(self.available_buttons_handler)
+        self.dispatcher.add_handler(self.say_buttons_handler)
+        self.dispatcher.add_handler(self.button_callback_handler)
 
-        updater.start_polling()
-        updater.idle()
+        self.updater.start_polling()
+        self.updater.idle()
     
     def cmd_task_buttons(self, update, context):
         task_buttons = [[
-            InlineKeyboardButton( '1.네이버 뉴스', callback_data=1 )
-            , InlineKeyboardButton( '2.직방 매물', callback_data=2 )
+            InlineKeyboardButton( '1.상품 등록 확인', callback_data=1 )
+            , InlineKeyboardButton( '2.상품 판매확인', callback_data=2 )
         ], [
             InlineKeyboardButton( '3.취소', callback_data=3 )
         ]]
@@ -54,7 +61,23 @@ class TeleGramBotManager:
             chat_id=update.message.chat_id
             , text='안녕하세요. 사고싶다에 오신걸 환영합니다.'
         )
-        
+    
+    def say(self, update, context):
+        output_message = str(update.message.chat_id) + '은 이렇게 말했습니다.\n' + str(context.args)
+        update.message.reply_text(output_message)
+
+    def cmd_reg_buttons(self, update, context):
+        context.bot.send_message(
+            chat_id=update.message.chat_id
+            , text='구현중.'
+        )
+
+    def cmd_available_buttons(self, update, context):
+        context.bot.send_message(
+            chat_id=update.message.chat_id
+            , text='구현중.'
+        )
+
     def cb_button(self, update, context):
         query = update.callback_query
         data = query.data
