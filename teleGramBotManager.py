@@ -9,18 +9,35 @@ from telegram import ChatAction
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, Filters
 from telegram.ext import CommandHandler, MessageHandler, CallbackQueryHandler
+from bs4 import BeautifulSoup
 
 import carwlShoppingMall
 
 class TeleGramBotManager:
 
-    def __init__(self, id, q):
+    def __init__(self, id, q, dec_key):
         self.objCarwlShoppingMall = q.get()
 
-        with open('../tele_key.txt', 'r') as file_handle:
-            self.line_txt = file_handle.readline()
+        self.BOT_TOKEN='iyhI2cFhKcosAP7jDEhg3pHsYfwjGcQQovJO8I9emi0qWoUCeXmjGBAxNDhD5cVM'
 
-        self.BOT_TOKEN=self.line_txt.strip()
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+            'Referer': 'https://kornorms.korean.go.kr/example/exampleList.do?regltn_code=0003',
+        }
+
+        data = {
+            'inpText': self.BOT_TOKEN,
+            'inpKey': dec_key,
+            'sleBlockSize': '256',
+            'direction': 'Decrypt'
+        }
+
+        result = self.objCarwlShoppingMall.webRequest('POST', 'https://aesencryption.net/', header_dict=headers, params_dict=data)
+
+        soup_obj = BeautifulSoup(result, "html.parser")
+        dec_data = soup_obj.find("textarea", {"id": "taOutText"})
+        if dec_data != None:
+            self.BOT_TOKEN = dec_data.text.strip()
 
         self.updater = Updater( token=self.BOT_TOKEN, use_context=True )
         self.dispatcher = self.updater.dispatcher

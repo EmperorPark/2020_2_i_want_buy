@@ -20,8 +20,9 @@ def main():
     
     objCarwlShoppingMall = carwlShoppingMall.CarwlShoppingMall()
 
+    dec_key = input('암호화 해제 키를 입력해 주세요(제출자 학번) >> ')
     q = Queue()
-    th1 = Process(target=teleGramBotManager.TeleGramBotManager, args=(1, q))
+    th1 = Process(target=teleGramBotManager.TeleGramBotManager, args=(1, q, dec_key))
     th1.start()
     
     q.put(objCarwlShoppingMall)
