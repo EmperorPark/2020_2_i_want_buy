@@ -11,18 +11,25 @@ import time
 import utils
 
 class CarwlShoppingMall:
-    
+
     def getGoodsPurchaseAvailableByURL(self, site_url):
         ''' 상품 구매 가능여부 사이트별 라우팅 함수'''
-        if 'coupang.com'.lower() in site_url.lower():
-            self.getGoodsPurchaseAvailableByURLFromCoupang(site_url)
+        rtn_str = ''
+        if 'http'.lower() not in site_url.lower():
+            rtn_str = '사이트 URL에는 http:// 혹은 https:// 가 포함되어야 합니다.'
+        elif 'coupang.com'.lower() in site_url.lower():
+            rtn_str = self.getGoodsPurchaseAvailableByURLFromCoupang(site_url) + '\n'
         elif 'ssg.com'.lower() in site_url.lower():
-            self.getGoodsPurchaseAvailableByURLFromSSG(site_url)
+            rtn_str = self.getGoodsPurchaseAvailableByURLFromSSG(site_url) + '\n'
         else:
-            print('!!!예외: site 불명확({}),  상품 구매 가능여부 확인 미실행'.format(site_url))
+            rtn_str = '!!!예외: site 불명확({}),  상품 구매 가능여부 확인 미실행'.format(site_url) + '\n'
+            print(rtn_str)
+        
+        return '\n' + rtn_str
 
     def getGoodsPurchaseAvailableByURLFromCoupang(self, site_url):
         '''쿠팡 URL의 상품 구매 가능 확인 함수'''
+        rtn_str = ''
         print('===================쿠팡 URL 확인 시작===================')
 
         headers = {
@@ -41,14 +48,18 @@ class CarwlShoppingMall:
         buyBtn = soup_obj.find("button", {"class": "prod-buy-btn"})
 
         if buyBtn != None and div_sold_out == None:
+            rtn_str += '구매가능' + '\n'
             print('구매가능')
         else:
+            rtn_str += '구매불가' + '\n'
             print('구매불가')
         
         print('===================쿠팡 URL 확인 끝===================')
+        return '\n' + rtn_str
 
     def getGoodsPurchaseAvailableByURLFromSSG(self, site_url):
         '''신세계 URL의 상품 구매 가능 확인 함수'''
+        rtn_str = ''
         print('===================신세계 URL 확인 시작===================')
 
         headers = {
@@ -67,25 +78,35 @@ class CarwlShoppingMall:
         if oriCart != None:
             actionPayment = oriCart.find("a", {"id":"actionPayment"})
             if actionPayment != None:
+                rtn_str += '구매가능' + '\n'
                 print('구매가능')
             else:
+                rtn_str += '구매불가' + '\n'
                 print('구매불가')
         else:
+            rtn_str += '구매불가' + '\n'
             print('구매불가')
 
         print('===================신세계 URL 확인 끝===================')
+        return '\n' + rtn_str
 
     def getGoodsRegisteredBySearch(self, searchWord):
         ''' 상품등록 검색 함수 각 사이트별 검색함수 실행 '''
+        rtn_str = ''
         if len(searchWord.split()) < 2:
+            rtn_str = '검색어를 2단어 이상 입력해 주세요' + '\n'
             print('검색어를 2단어 이상 입력해 주세요')
-            return
-        self.getGoodsRegisteredBySearchFromCoupang(searchWord)
-        self.getGoodsRegisteredBySearchFromSSG(searchWord)
+            return '\n' + rtn_str
+        rtn_str += self.getGoodsRegisteredBySearchFromCoupang(searchWord) + '\n'
+        rtn_str += self.getGoodsRegisteredBySearchFromSSG(searchWord) + '\n'
         
+        return rtn_str
+
     def getGoodsRegisteredBySearchFromCoupang(self, searchWord):
         ''' 쿠팡 등록 검색함수 '''
+        rtn_str = '===================쿠팡 검색 시작===================' + '\n'
         print('===================쿠팡 검색 시작===================')
+        rtn_str += '검색 유사도: (검색어 갯수//2) 이상 포함' + '\n'
         print('검색 유사도: (검색어 갯수//2) 이상 포함')
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
@@ -99,7 +120,7 @@ class CarwlShoppingMall:
         }
         
         keywords = searchWord.split()
-        search_dict = self.foreignLangSearch(keywords)
+        search_dict = self.searchForeignLang(keywords)
 
         search_list = self.getCombinationSearchResult(search_dict)
 
@@ -137,17 +158,22 @@ class CarwlShoppingMall:
             
             if len(keywords) > 2:
                 if count >= len(keywords)//2:
+                    rtn_str += "상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr + "\n"
                     print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
             else:
                 if count >= 2:
+                    rtn_str += "상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr + "\n"
                     print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
 
-        
+        rtn_str += '===================쿠팡 검색 끝===================' + '\n'
         print('===================쿠팡 검색 끝===================')
+        return '\n' + rtn_str
 
     def getGoodsRegisteredBySearchFromSSG(self, searchWord):
         '''신세계 등록 검색함수'''
+        rtn_str = '===================신세계 검색 시작===================' + '\n'
         print('===================신세계 검색 시작===================')
+        rtn_str += '검색 유사도: (검색어 갯수//2) 이상 포함' + '\n'
         print('검색 유사도: (검색어 갯수//2) 이상 포함')
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
@@ -160,7 +186,7 @@ class CarwlShoppingMall:
         }
         
         keywords = searchWord.split()
-        search_dict = self.foreignLangSearch(keywords)
+        search_dict = self.searchForeignLang(keywords)
 
         search_list = self.getCombinationSearchResult(search_dict)
 
@@ -200,15 +226,18 @@ class CarwlShoppingMall:
             
             if len(keywords) > 2:
                 if count >= len(keywords)//2:
+                    rtn_str += "상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr + "\n"
                     print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
             else:
                 if count >= 2:
+                    rtn_str += "상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr + "\n"
                     print("상품명: " + product.text.strip() + " / " + "상품가격: " + priceStr)
 
-        
+        rtn_str += '===================신세계 검색 끝===================' + '\n' 
         print('===================신세계 검색 끝===================')
+        return '\n' + rtn_str
     
-    def foreignLangSearch(self, keywords):
+    def searchForeignLang(self, keywords):
         '''영어나 왜래어를 왜래어 사전을 통해 영어 또는 한국어로 받아 딕셔너리로 반환'''
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
