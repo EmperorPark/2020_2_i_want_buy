@@ -3,7 +3,7 @@
 
 크롤링 및 외부 API기반으로 만들어져 사이트 및 API변화에 대응이 바로 안될 수 있습니다.
 
-프로그램을 구동하신 뒤(종료되면 안됨) 텔레그램에서 @EmperorPurchaseAvailableBot(https://t.me/EmperorPurchaseAvailableBot)을 친구추가 하시고 /help명령의 설명에따라 사용하시면 됩니다.
+프로그램을 구동하신 뒤(종료되면 안됨) 텔레그램에서 @EmperorPurchaseAvailableBot(https://t.me/EmperorPurchaseAvailableBot) 을 친구추가 하시고 /help명령의 설명에따라 사용하시면 됩니다.
 
 텔레그램 API키는 암호화 되어 있음으로 해독키가 없으신분들은 자신의 봇을 따로 생성하시고 코드를 수정해서 쓰셔야 합니다.
 
