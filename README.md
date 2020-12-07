@@ -8,4 +8,5 @@
 ---
 # 환경
 작성언어: python
+
 실행 테스트: Windows 10 2004(19041.630), python 3.8.3 x64, Anoconda
