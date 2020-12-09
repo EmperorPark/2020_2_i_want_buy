@@ -21,4 +21,4 @@ python -m pip install python-telegram-bot --upgrade
 이외에는 import나 from문에 따라 그대로 설치하면 됨
 
 
-실행 테스트: Windows 10 2004(19041.630), python 3.8.3 x64, Anoconda
+실행 테스트: Windows 10 2004(19041.630), python 3.8.3 x64, Anaconda
